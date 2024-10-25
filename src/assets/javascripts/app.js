@@ -386,60 +386,54 @@ var vm = new Vue({
     var tempDiv = document.createElement('div');
     tempDiv.innerHTML = content;
   
-    // 提取所有文本节点
-    var textNodes = [];
-    var walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
-    var node;
-    while (node = walker.nextNode()) {
-      if (node.nodeValue.trim()) {
-        textNodes.push(node);
+    // 递归函数来处理所有文本节点
+    var processNode = function(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return node.textContent;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        var texts = [];
+        for (var i = 0; i < node.childNodes.length; i++) {
+          texts.push(processNode(node.childNodes[i]));
+        }
+        return texts.join(' ');
       }
-    }
+      return '';
+    };
   
-    // 将文本节点分成块（每块最多1000个字符）
-    var textBlocks = [];
-    var currentBlock = '';
-    for (var i = 0; i < textNodes.length; i++) {
-      if (currentBlock.length + textNodes[i].nodeValue.length > 1000) {
-        textBlocks.push(currentBlock);
-        currentBlock = '';
-      }
-      currentBlock += textNodes[i].nodeValue + '\n';
-    }
-    if (currentBlock) {
-      textBlocks.push(currentBlock);
+    var fullText = processNode(tempDiv);
+    var textChunks = [];
+  
+    // 将文本分成5000字符的块
+    while (fullText.length > 0) {
+      textChunks.push(fullText.slice(0, 5000));
+      fullText = fullText.slice(5000);
     }
   
     // 翻译每个块
-    var translatedBlocks = [];
-    var translateBlock = function(index) {
-      if (index >= textBlocks.length) {
+    var translatedChunks = [];
+    var translateChunk = function(index) {
+      if (index >= textChunks.length) {
         // 所有块都已翻译，更新 HTML
-        for (var i = 0; i < textNodes.length; i++) {
-          var translatedText = translatedBlocks.shift();
-          if (translatedText) {
-            textNodes[i].nodeValue = translatedText.trim();
-          }
-        }
-        vm.itemSelectedContent = tempDiv.innerHTML;
+        var translatedText = translatedChunks.join('');
+        this.itemSelectedContent = translatedText;
         return;
       }
   
-      api.translate(textBlocks[index], sourceLang, targetLang).then(function(result) {
+      api.translate(textChunks[index], sourceLang, targetLang).then(function(result) {
         if (result && result.translation) {
-          translatedBlocks.push(result.translation);
+          translatedChunks.push(result.translation);
         } else {
-          translatedBlocks.push(textBlocks[index]);
+          translatedChunks.push(textChunks[index]);
         }
-        translateBlock(index + 1);
-      }).catch(function(error) {
+        translateChunk(index + 1);
+      }.bind(this)).catch(function(error) {
         console.error('Translation error:', error);
-        translatedBlocks.push(textBlocks[index]);
-        translateBlock(index + 1);
-      });
-    };
+        translatedChunks.push(textChunks[index]);
+        translateChunk(index + 1);
+      }.bind(this));
+    }.bind(this);
   
-    translateBlock(0);
+    translateChunk(0);
   },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
