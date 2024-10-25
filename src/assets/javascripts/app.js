@@ -232,6 +232,15 @@ var vm = new Vue({
       'refreshRate': s.refresh_rate,
       'authenticated': app.authenticated,
       'feed_errors': {},
+      'loading': {
+      'feeds': 0,
+      'newfeed': false,
+      'items': false,
+      'readability': false,
+      'summary': false
+    },
+    'summaryContent': null,
+  'showSummary': false,
     }
   },
   computed: {
@@ -358,6 +367,49 @@ var vm = new Vue({
     },
   },
   methods: {
+    summarizeArticle: async function() {
+      if (!this.itemSelectedDetails || !this.itemSelectedDetails.link) return;
+      
+      this.loading.summary = true;
+      try {
+          // 获取jina.ai的内容
+          const jinaUrl = "https://r.jina.ai/" + this.itemSelectedDetails.link;
+          const response = await fetch(jinaUrl);
+          const markdown = await response.text();
+          
+          // 请求ChatGPT API
+          const apiResponse = await fetch('https://api.wangwangit.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                  'Authorization': 'Bearer sk-bxypWA0N9r8LJDPa2TxTHMbzJjaIcq7bjdtDdfi8bK9oIrUX',
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                  "model": "gpt-4o",
+                  "messages": [
+                      {
+                          "role": "system",
+                          "content": "You are a helpful assistant that summarizes articles concisely.you shoud answer in Chinese. use simple words and sentences. get important information and remove unnecessary details."
+                      },
+                      {
+                          "role": "user",
+                          "content": markdown
+                      }
+                  ],
+                  "stream": false
+              })
+          });
+          
+          const result = await apiResponse.json();
+          this.summaryContent = result.choices[0].message.content;
+          this.showSummary = true;
+      } catch (error) {
+          console.error('Error:', error);
+          this.summaryContent = "Failed to generate summary.";
+      } finally {
+          this.loading.summary = false;
+      }
+  },
     renderMarkdown: function(markdown) {
       console.log('Rendering markdown:', markdown.substring(0, 300) + '...');
       // 检查是否为指定域名
