@@ -375,7 +375,7 @@ var vm = new Vue({
           // 获取jina.ai的内容
           const jinaUrl = "https://r.jina.ai/" + this.itemSelectedDetails.link;
           const response = await fetch(jinaUrl);
-          const markdown = await response.text();
+    
           
           // 请求ChatGPT API
           const apiResponse = await fetch('https://api.wangwangit.com/v1/chat/completions', {
@@ -393,7 +393,7 @@ var vm = new Vue({
                       },
                       {
                           "role": "user",
-                          "content": markdown
+                          "content": response
                       }
                   ],
                   "stream": false
