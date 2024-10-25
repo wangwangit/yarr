@@ -361,7 +361,7 @@ func (s *Server) handleItem(c *router.Context) {
 		}
 		var specialDomains = []string{
 			"werss.bestblogs.dev",
-			// 在这里添加其他需要特殊处理的域名
+			"mp.weixin.qq.com",
 		}
  // 检查item.Link是否包含指定域名
  log.Printf("Checking item link: %s", item.Link)
