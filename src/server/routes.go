@@ -328,8 +328,9 @@ func (s *Server) handleTranslate(c *router.Context) {
     }
 
     translationURL := "https://deeplx.doi9.top/translate"
-    requestBody := fmt.Sprintf(`{"text":"%s","source_lang":"%s","target_lang":"%s"}`, request.Text, request.SourceLang, request.TargetLang)
-    resp, err := http.Post(translationURL, "application/json", bytes.NewBufferString(requestBody))
+    requestBody := fmt.Sprintf(`{"text":%s,"source_lang":"%s","target_lang":"%s"}`, 
+        strconv.Quote(request.Text), request.SourceLang, request.TargetLang)
+    resp, err := http.Post(translationURL, "application/json", strings.NewReader(requestBody))
     if err != nil {
         c.Out.WriteHeader(http.StatusInternalServerError)
         return

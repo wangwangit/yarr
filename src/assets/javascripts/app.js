@@ -375,21 +375,72 @@ var vm = new Vue({
           return markdown;
       }
   },
-    translateContent: function() {
-      if (!this.itemSelectedDetails) return;
-      
-      var content = this.itemSelectedContent;
-      var sourceLang = 'auto';
-      var targetLang = 'zh'; // 假设目标语言是中文
+  translateContent: function() {
+    if (!this.itemSelectedDetails) return;
+    
+    var content = this.itemSelectedContent;
+    var sourceLang = 'auto';
+    var targetLang = 'zh';
   
-      api.translate(content, sourceLang, targetLang).then(function(result) {
-          if (result && result.translation) {
-              vm.itemSelectedContent = result.translation;
+    // 创建一个临时的 DOM 元素来解析 HTML
+    var tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+  
+    // 提取所有文本节点
+    var textNodes = [];
+    var walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
+    var node;
+    while (node = walker.nextNode()) {
+      if (node.nodeValue.trim()) {
+        textNodes.push(node);
+      }
+    }
+  
+    // 将文本节点分成块（每块最多1000个字符）
+    var textBlocks = [];
+    var currentBlock = '';
+    for (var i = 0; i < textNodes.length; i++) {
+      if (currentBlock.length + textNodes[i].nodeValue.length > 1000) {
+        textBlocks.push(currentBlock);
+        currentBlock = '';
+      }
+      currentBlock += textNodes[i].nodeValue + '\n';
+    }
+    if (currentBlock) {
+      textBlocks.push(currentBlock);
+    }
+  
+    // 翻译每个块
+    var translatedBlocks = [];
+    var translateBlock = function(index) {
+      if (index >= textBlocks.length) {
+        // 所有块都已翻译，更新 HTML
+        for (var i = 0; i < textNodes.length; i++) {
+          var translatedText = translatedBlocks.shift();
+          if (translatedText) {
+            textNodes[i].nodeValue = translatedText.trim();
           }
+        }
+        vm.itemSelectedContent = tempDiv.innerHTML;
+        return;
+      }
+  
+      api.translate(textBlocks[index], sourceLang, targetLang).then(function(result) {
+        if (result && result.translation) {
+          translatedBlocks.push(result.translation);
+        } else {
+          translatedBlocks.push(textBlocks[index]);
+        }
+        translateBlock(index + 1);
       }).catch(function(error) {
-          console.error('Translation error:', error);
+        console.error('Translation error:', error);
+        translatedBlocks.push(textBlocks[index]);
+        translateBlock(index + 1);
       });
-  },
+    };
+  
+    translateBlock(0);
+  }
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
         if (loopMode && !vm.itemSelected) vm.refreshItems()
