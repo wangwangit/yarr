@@ -24,10 +24,7 @@ import (
 	"github.com/nkanaev/yarr/src/worker"
 )
 
-var specialDomains = []string{
-    "werss.bestblogs.dev",
-    "pm.weixin.qq.com"
-}
+
 
 func (s *Server) handler() http.Handler {
 	r := router.NewRouter(s.BasePath)
@@ -362,7 +359,10 @@ func (s *Server) handleItem(c *router.Context) {
 			c.Out.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
+		var specialDomains = []string{
+			"werss.bestblogs.dev",
+			// 在这里添加其他需要特殊处理的域名
+		}
  // 检查item.Link是否包含指定域名
  log.Printf("Checking item link: %s", item.Link)
  containsSpecialDomain := false
