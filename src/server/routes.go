@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-
+	"bytes"
 	"github.com/nkanaev/yarr/src/assets"
 	"github.com/nkanaev/yarr/src/content/htmlutil"
 	"github.com/nkanaev/yarr/src/content/readability"
@@ -326,7 +326,8 @@ func (s *Server) handleTranslate(c *router.Context) {
     }
 
     translationURL := "https://deeplx.doi9.top/translate"
-    resp, err := http.Post(translationURL, "application/json", bytes.NewBuffer([]byte(fmt.Sprintf(`{"text":"%s","source_lang":"%s","target_lang":"%s"}`, request.Text, request.SourceLang, request.TargetLang))))
+    requestBody := fmt.Sprintf(`{"text":"%s","source_lang":"%s","target_lang":"%s"}`, request.Text, request.SourceLang, request.TargetLang)
+    resp, err := http.Post(translationURL, "application/json", bytes.NewBufferString(requestBody))
     if err != nil {
         c.Out.WriteHeader(http.StatusInternalServerError)
         return
@@ -344,7 +345,6 @@ func (s *Server) handleTranslate(c *router.Context) {
 
     c.JSON(http.StatusOK, map[string]string{"translation": translationResponse.Data})
 }
-
 func (s *Server) handleItem(c *router.Context) {
 	id, err := c.VarInt64("id")
 	if err != nil {
