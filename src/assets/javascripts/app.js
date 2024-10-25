@@ -359,9 +359,9 @@ var vm = new Vue({
   },
   methods: {
     renderMarkdown: function(markdown) {
-      console.log('Rendering markdown:', markdown.substring(0, 100) + '...');
+      console.log('Rendering markdown:', markdown.substring(0, 300) + '...');
       // 检查是否为指定域名
-      if (markdown.includes('Markdown Content')) {
+      if (markdown.substring(0, 300).includes('Markdown')) {
           console.log('Markdown Content detected');
           if (typeof marked === 'undefined') {
               console.error('marked.js is not loaded.');
