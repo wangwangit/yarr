@@ -367,69 +367,7 @@ var vm = new Vue({
     },
   },
   methods: {
-    summarizeArticle: async function() {
-      if (!this.itemSelectedDetails || !this.itemSelectedDetails.link) return;
-      
-      this.loading.summary = true;
-      this.summaryContent = ''; // 清空之前的内容
-      this.showSummary = true; // 立即显示弹窗
-      
-    
-              const response = await fetch(this.itemSelectedDetails.link);
-              const markdown = await response.text();
-
-      try {
-          const response = await fetch('https://api.wangwangit.com/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                  'Authorization': 'Bearer sk-bxypWA0N9r8LJDPa2TxTHMbzJjaIcq7bjdtDdfi8bK9oIrUX',
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                  "model": "gpt-4o",
-                  "messages": [
-                      {
-                          "role": "user", 
-                          "content": "请总结以下文章的主要内容，用一段话概括，目标读者是IT从业者。 请力求简洁明了，长度约为100-150字，并保持客观语气。重点关注文章的核心论点和关键发现。"+ markdown
-                      }
-                  ],
-                  "stream": true
-              })
-          });
   
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          
-          while (true) {
-              const {value, done} = await reader.read();
-              if (done) break;
-              
-              const chunk = decoder.decode(value);
-              const lines = chunk.split('\n');
-              
-              for (const line of lines) {
-                  if (line.startsWith('data: ')) {
-                      const data = line.slice(6);
-                      if (data === '[DONE]') continue;
-                      
-                      try {
-                          const json = JSON.parse(data);
-                          if (json.choices[0].delta.content) {
-                              this.summaryContent += json.choices[0].delta.content;
-                          }
-                      } catch (e) {
-                          console.error('Error parsing JSON:', e);
-                      }
-                  }
-              }
-          }
-      } catch (error) {
-          console.error('Error:', error);
-          this.summaryContent = "生成摘要失败，请稍后重试。";
-      } finally {
-          this.loading.summary = false;
-      }
-  },
     renderMarkdown: function(markdown) {
       console.log('Rendering markdown:', markdown.substring(0, 300) + '...');
       // 检查是否为指定域名

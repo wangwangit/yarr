@@ -330,9 +330,6 @@
                 <a class="toolbar-item" :href="itemSelectedDetails.link" target="_blank" title="Open Link">
                     <span class="icon">{% inline "external-link.svg" %}</span>
                 </a>
-                <button class="toolbar-item" @click="summarizeArticle()" title="AI Summary">
-                    <span class="icon" :class="{'icon-loading': loading.summary}">{% inline "brain.svg" %}</span>
-                </button>
                 <div class="flex-grow-1"></div>
                 <button class="toolbar-item" @click="itemSelected=null" title="Close Article">
                     <span class="icon">{% inline "x.svg" %}</span>
@@ -417,15 +414,6 @@
                     </tr>
                 </table>
             </div>
-            <div v-if="showSummary" class="summary-popup-overlay" @click="showSummary = false">
-                <div class="summary-popup" @click.stop>
-                    <button class="close-btn toolbar-item" @click="showSummary = false">
-                        <span class="icon">{% inline "x.svg" %}</span>
-                    </button>
-                    <h3>AI Summary</h3>
-                    <div v-html="summaryContent"></div>
-                </div>
-
         </modal>
     </div>
 
