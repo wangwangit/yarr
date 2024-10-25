@@ -375,66 +375,6 @@ var vm = new Vue({
           return markdown;
       }
   },
-  translateContent: function() {
-    if (!this.itemSelectedDetails) return;
-    
-    var content = this.itemSelectedContent;
-    var sourceLang = 'auto';
-    var targetLang = 'zh';
-  
-    // 创建一个临时的 DOM 元素来解析 HTML
-    var tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-  
-    // 递归函数来处理所有文本节点
-    var processNode = function(node) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent;
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        var texts = [];
-        for (var i = 0; i < node.childNodes.length; i++) {
-          texts.push(processNode(node.childNodes[i]));
-        }
-        return texts.join(' ');
-      }
-      return '';
-    };
-  
-    var fullText = processNode(tempDiv);
-    var textChunks = [];
-  
-    // 将文本分成5000字符的块
-    while (fullText.length > 0) {
-      textChunks.push(fullText.slice(0, 5000));
-      fullText = fullText.slice(5000);
-    }
-  
-    // 翻译每个块
-    var translatedChunks = [];
-    var translateChunk = function(index) {
-      if (index >= textChunks.length) {
-        // 所有块都已翻译，更新 HTML
-        var translatedText = translatedChunks.join('');
-        this.itemSelectedContent = translatedText;
-        return;
-      }
-  
-      api.translate(textChunks[index], sourceLang, targetLang).then(function(result) {
-        if (result && result.translation) {
-          translatedChunks.push(result.translation);
-        } else {
-          translatedChunks.push(textChunks[index]);
-        }
-        translateChunk(index + 1);
-      }.bind(this)).catch(function(error) {
-        console.error('Translation error:', error);
-        translatedChunks.push(textChunks[index]);
-        translateChunk(index + 1);
-      }.bind(this));
-    }.bind(this);
-  
-    translateChunk(0);
-  },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
         if (loopMode && !vm.itemSelected) vm.refreshItems()
@@ -764,3 +704,4 @@ var vm = new Vue({
 })
 
 vm.$mount('#app')
+

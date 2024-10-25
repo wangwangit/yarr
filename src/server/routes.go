@@ -60,7 +60,6 @@ func (s *Server) handler() http.Handler {
 	r.For("/page", s.handlePageCrawl)
 	r.For("/logout", s.handleLogout)
 	r.For("/fever/", s.handleFever)
-	r.For("/api/translate", s.handleTranslate)
 	return r
 }
 
@@ -309,44 +308,6 @@ func (s *Server) handleFeed(c *router.Context) {
 	}
 }
 
-func (s *Server) handleTranslate(c *router.Context) {
-    if c.Req.Method != "POST" {
-        c.Out.WriteHeader(http.StatusMethodNotAllowed)
-        return
-    }
-
-    var request struct {
-        Text       string `json:"text"`
-        SourceLang string `json:"source_lang"`
-        TargetLang string `json:"target_lang"`
-    }
-
-    if err := json.NewDecoder(c.Req.Body).Decode(&request); err != nil {
-        c.Out.WriteHeader(http.StatusBadRequest)
-        return
-    }
-
-    translationURL := "https://deeplx.doi9.top/translate"
-    requestBody := fmt.Sprintf(`{"text":%s,"source_lang":"%s","target_lang":"%s"}`, 
-        strconv.Quote(request.Text), request.SourceLang, request.TargetLang)
-    resp, err := http.Post(translationURL, "application/json", strings.NewReader(requestBody))
-    if err != nil {
-        c.Out.WriteHeader(http.StatusInternalServerError)
-        return
-    }
-    defer resp.Body.Close()
-
-    var translationResponse struct {
-        Data string `json:"data"`
-    }
-
-    if err := json.NewDecoder(resp.Body).Decode(&translationResponse); err != nil {
-        c.Out.WriteHeader(http.StatusInternalServerError)
-        return
-    }
-
-    c.JSON(http.StatusOK, map[string]string{"translation": translationResponse.Data})
-}
 func (s *Server) handleItem(c *router.Context) {
 	id, err := c.VarInt64("id")
 	if err != nil {
@@ -598,3 +559,4 @@ func (s *Server) handleLogout(c *router.Context) {
 	auth.Logout(c.Out, s.BasePath)
 	c.Out.WriteHeader(http.StatusNoContent)
 }
+
