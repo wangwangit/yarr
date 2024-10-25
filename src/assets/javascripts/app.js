@@ -359,18 +359,22 @@ var vm = new Vue({
   },
   methods: {
     renderMarkdown: function(markdown) {
-        // 检查是否为指定域名
-        if (markdown.includes('Markdown Content')) {
+      console.log('Rendering markdown:', markdown.substring(0, 100) + '...');
+      // 检查是否为指定域名
+      if (markdown.includes('Markdown Content')) {
+          console.log('Markdown Content detected');
           if (typeof marked === 'undefined') {
-            console.error('marked.js is not loaded.');
-            return markdown; // Return original markdown if marked.js is not available
+              console.error('marked.js is not loaded.');
+              return markdown; // Return original markdown if marked.js is not available
           }
+          console.log('Parsing markdown with marked.js');
           return marked.parse(markdown);
-        } else {
+      } else {
+          console.log('No Markdown Content detected, returning original content');
           // 对于其他域名,直接返回原始内容
           return markdown;
-        }
-    },
+      }
+  },
     translateContent: function() {
       if (!this.itemSelectedDetails) return;
       
