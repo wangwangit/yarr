@@ -386,21 +386,21 @@ var vm = new Vue({
                 "model": "gpt-4o",
                 "messages": [
                     {
-                        "role": "system",
-                        "content": "请你作为一位专业的内容分析师,我会提供一个网址,帮我阅读并总结以下网址的内容:请遵循以下要求:1. 提取核心观点和关键信息2. 保持原文的主要论点和逻辑结构3. 以简洁清晰的方式呈现4. 去除冗余内容,保留精华部分输出格式:1. 核心要点(3-5点)2. 详细总结(300-500字)3. 关键见解(如有); 注意,使用中文答复! 我会提供网址给你!"
-                    },
-                    {
                         "role": "user",
-                        "content": "网址是: " + this.itemSelectedDetails.link
+                        "content": "请你作为一位专业的内容分析师,我会提供一个网址,帮我阅读并总结以下网址的内容:请遵循以下要求:1. 提取核心观点和关键信息2. 保持原文的主要论点和逻辑结构3. 以简洁清晰的方式呈现4. 去除冗余内容,保留精华部分输出格式:1. 核心要点(3-5点)2. 详细总结(300-500字)3. 关键见解(如有); 注意,使用中文答复! 网址是: " + this.itemSelectedDetails.link
                     }
                 ],
                 "stream": false
             })
           });
           
-          const result = await apiResponse.json();
-          this.summaryContent = result.choices[0].message.content;
-          this.showSummary = true;
+          // 添加错误处理和响应检查
+          if (!result || !result.choices || !result.choices[0] || !result.choices[0].message) {
+            throw new Error('Invalid API response format');
+        }
+
+        this.summaryContent = result.choices[0].message.content;
+        this.showSummary = true;
       } catch (error) {
           console.error('Error:', error);
           this.summaryContent = "Failed to generate summary.";
