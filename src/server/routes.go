@@ -59,7 +59,7 @@ func (s *Server) handler() http.Handler {
 	r.For("/page", s.handlePageCrawl)
 	r.For("/logout", s.handleLogout)
 	r.For("/fever/", s.handleFever)
-	r.Handle("/api/translate", s.handleTranslate)
+	r.For("/api/translate", s.handleTranslate)
 	return r
 }
 
