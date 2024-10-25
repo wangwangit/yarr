@@ -440,7 +440,7 @@ var vm = new Vue({
     };
   
     translateBlock(0);
-  }
+  },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
         if (loopMode && !vm.itemSelected) vm.refreshItems()
