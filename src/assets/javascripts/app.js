@@ -372,11 +372,9 @@ var vm = new Vue({
       
       this.loading.summary = true;
       try {
-          // 获取jina.ai的内容
-          const jinaUrl = "https://r.jina.ai/" + this.itemSelectedDetails.link;
-          const response = await fetch(jinaUrl);
-    
-          
+     
+        
+     
           // 请求ChatGPT API
           const apiResponse = await fetch('https://api.wangwangit.com/v1/chat/completions', {
               method: 'POST',
@@ -385,19 +383,19 @@ var vm = new Vue({
                   'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                  "model": "gpt-4o",
-                  "messages": [
-                      {
-                          "role": "system",
-                          "content": "You are a helpful assistant that summarizes articles concisely.you shoud answer in Chinese. use simple words and sentences. get important information and remove unnecessary details."
-                      },
-                      {
-                          "role": "user",
-                          "content": response
-                      }
-                  ],
-                  "stream": false
-              })
+                "model": "gpt-4o",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "请你作为一位专业的内容分析师,我会提供一个网址,帮我阅读并总结以下网址的内容:请遵循以下要求:1. 提取核心观点和关键信息2. 保持原文的主要论点和逻辑结构3. 以简洁清晰的方式呈现4. 去除冗余内容,保留精华部分输出格式:1. 核心要点(3-5点)2. 详细总结(300-500字)3. 关键见解(如有); 注意,使用中文答复! 我会提供网址给你!"
+                    },
+                    {
+                        "role": "user",
+                        "content": "网址是: " + this.itemSelectedDetails.link
+                    }
+                ],
+                "stream": false
+            })
           });
           
           const result = await apiResponse.json();
