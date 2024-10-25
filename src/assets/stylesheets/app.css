@@ -594,6 +594,25 @@ a,
   #app.item-selected #col-item {
     display: flex !important;
   }
+  .summary-popup {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.summary-popup .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 5px;
+}
 }
 
 @media (max-width: 767.98px) {

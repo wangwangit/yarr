@@ -417,17 +417,18 @@
                     </tr>
                 </table>
             </div>
+            <div v-if="showSummary" class="summary-popup-overlay" @click="showSummary = false">
+                <div class="summary-popup" @click.stop>
+                    <button class="close-btn toolbar-item" @click="showSummary = false">
+                        <span class="icon">{% inline "x.svg" %}</span>
+                    </button>
+                    <h3>AI Summary</h3>
+                    <div v-html="summaryContent"></div>
+                </div>
+            </div>
         </modal>
     </div>
-    <div v-if="showSummary" class="summary-popup-overlay" @click="showSummary = false">
-        <div class="summary-popup" @click.stop>
-            <button class="close-btn toolbar-item" @click="showSummary = false">
-                <span class="icon">{% inline "x.svg" %}</span>
-            </button>
-            <h3>AI Summary</h3>
-            <div v-html="summaryContent"></div>
-        </div>
-    </div>
+
     <!-- external -->
     <script src="./static/javascripts/vue.min.js"></script>
     <!-- internal -->
