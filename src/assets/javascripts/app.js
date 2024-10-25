@@ -360,7 +360,7 @@ var vm = new Vue({
   methods: {
     renderMarkdown: function(markdown) {
         // 检查是否为指定域名
-        if (url && url.includes('werss.bestblogs.dev')) {
+        if (markdown.includes('Markdown Content')) {
           if (typeof marked === 'undefined') {
             console.error('marked.js is not loaded.');
             return markdown; // Return original markdown if marked.js is not available
@@ -371,6 +371,21 @@ var vm = new Vue({
           return markdown;
         }
     },
+    translateContent: function() {
+      if (!this.itemSelectedDetails) return;
+      
+      var content = this.itemSelectedContent;
+      var sourceLang = 'auto';
+      var targetLang = 'zh'; // 假设目标语言是中文
+  
+      api.translate(content, sourceLang, targetLang).then(function(result) {
+          if (result && result.translation) {
+              vm.itemSelectedContent = result.translation;
+          }
+      }).catch(function(error) {
+          console.error('Translation error:', error);
+      });
+  },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
         if (loopMode && !vm.itemSelected) vm.refreshItems()

@@ -106,6 +106,13 @@
     },
     crawl: function(url) {
       return api('get', './page?url=' + encodeURIComponent(url)).then(json)
-    }
+    },
+    translate: function(text, sourceLang, targetLang) {
+      return api('post', './api/translate', {
+          text: text,
+          source_lang: sourceLang,
+          target_lang: targetLang
+      }).then(json)
+  },
   }
 })()
