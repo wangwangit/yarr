@@ -10,7 +10,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-	"bytes"
 	"github.com/nkanaev/yarr/src/assets"
 	"github.com/nkanaev/yarr/src/content/htmlutil"
 	"github.com/nkanaev/yarr/src/content/readability"
