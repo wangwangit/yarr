@@ -358,20 +358,27 @@ func (s *Server) handleItem(c *router.Context) {
 			return
 		}
 
-        // 检查item.Link是否包含指定域名
-        if strings.Contains(item.Link, "werss.bestblogs.dev") {
-            // 使用jina.ai解析
-            jinaURL := "https://r.jina.ai/" + item.Link
-            jinaContent, err := worker.GetBody(jinaURL)
-            if err == nil { // jina.ai 解析成功
-                item.Content = sanitizer.Sanitize(item.Link, jinaContent)
-            } else { // jina.ai 解析失败，使用原有方法
-                fallbackToOriginalMethod(s, item)
-            }
-        } else {
-            // 直接使用原有方法
+            // 检查item.Link是否包含指定域名
+    log.Printf("Checking item link: %s", item.Link)
+    if strings.Contains(item.Link, "werss.bestblogs.dev") {
+        log.Println("Link contains werss.bestblogs.dev, attempting to use jina.ai")
+        // 使用jina.ai解析
+        jinaURL := "https://r.jina.ai/" + item.Link
+        log.Printf("Requesting jina.ai URL: %s", jinaURL)
+        jinaContent, err := worker.GetBody(jinaURL)
+        if err == nil { // jina.ai 解析成功
+            log.Println("Successfully retrieved content from jina.ai")
+            item.Content = sanitizer.Sanitize(item.Link, jinaContent)
+        } else { // jina.ai 解析失败，使用原有方法
+            log.Printf("Failed to retrieve content from jina.ai: %v", err)
+            log.Println("Falling back to original method")
             fallbackToOriginalMethod(s, item)
         }
+    } else {
+        log.Println("Link does not contain werss.bestblogs.dev, using original method")
+        // 直接使用原有方法
+        fallbackToOriginalMethod(s, item)
+    }
 
 		c.JSON(http.StatusOK, item)
 	} else if c.Req.Method == "PUT" {
