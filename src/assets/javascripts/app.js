@@ -371,39 +371,61 @@ var vm = new Vue({
       if (!this.itemSelectedDetails || !this.itemSelectedDetails.link) return;
       
       this.loading.summary = true;
+      this.summaryContent = ''; // 清空之前的内容
+      this.showSummary = true; // 立即显示弹窗
+      
       try {
-     
-        
-     
-          // 请求ChatGPT API
-          const apiResponse = await fetch('https://api.wangwangit.com/v1/chat/completions', {
+          const response = await fetch('https://api.wangwangit.com/v1/chat/completions', {
               method: 'POST',
               headers: {
                   'Authorization': 'Bearer sk-bxypWA0N9r8LJDPa2TxTHMbzJjaIcq7bjdtDdfi8bK9oIrUX',
                   'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                "model": "gpt-4o",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": "请你作为一位专业的内容分析师,我会提供一个网址,帮我阅读并总结以下网址的内容:请遵循以下要求:1. 提取核心观点和关键信息2. 保持原文的主要论点和逻辑结构3. 以简洁清晰的方式呈现4. 去除冗余内容,保留精华部分输出格式:1. 核心要点(3-5点)2. 详细总结(300-500字)3. 关键见解(如有); 注意,使用中文答复! 网址是: " + this.itemSelectedDetails.link
-                    }
-                ],
-                "stream": false
-            })
+                  "model": "gpt-4o",
+                  "messages": [
+                      {
+                          "role": "system",
+                          "content": "请你作为一位专业的内容分析师,我会提供一个网址,帮我阅读并总结以下网址的内容:请遵循以下要求:1. 提取核心观点和关键信息2. 保持原文的主要论点和逻辑结构3. 以简洁清晰的方式呈现4. 去除冗余内容,保留精华部分输出格式:1. 核心要点(3-5点)2. 详细总结(300-500字)3. 关键见解(如有); 注意,使用中文答复!"
+                      },
+                      {
+                          "role": "user", 
+                          "content": "网址是: " + this.itemSelectedDetails.link
+                      }
+                  ],
+                  "stream": true
+              })
           });
+  
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
           
-          // 添加错误处理和响应检查
-          if (!result || !result.choices || !result.choices[0] || !result.choices[0].message) {
-            throw new Error('Invalid API response format');
-        }
-
-        this.summaryContent = result.choices[0].message.content;
-        this.showSummary = true;
+          while (true) {
+              const {value, done} = await reader.read();
+              if (done) break;
+              
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+              
+              for (const line of lines) {
+                  if (line.startsWith('data: ')) {
+                      const data = line.slice(6);
+                      if (data === '[DONE]') continue;
+                      
+                      try {
+                          const json = JSON.parse(data);
+                          if (json.choices[0].delta.content) {
+                              this.summaryContent += json.choices[0].delta.content;
+                          }
+                      } catch (e) {
+                          console.error('Error parsing JSON:', e);
+                      }
+                  }
+              }
+          }
       } catch (error) {
           console.error('Error:', error);
-          this.summaryContent = "Failed to generate summary.";
+          this.summaryContent = "生成摘要失败，请稍后重试。";
       } finally {
           this.loading.summary = false;
       }
