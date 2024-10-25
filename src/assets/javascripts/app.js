@@ -374,6 +374,10 @@ var vm = new Vue({
       this.summaryContent = ''; // 清空之前的内容
       this.showSummary = true; // 立即显示弹窗
       
+    
+              const response = await fetch(this.itemSelectedDetails.link);
+              const markdown = await response.text();
+
       try {
           const response = await fetch('https://api.wangwangit.com/v1/chat/completions', {
               method: 'POST',
@@ -385,12 +389,8 @@ var vm = new Vue({
                   "model": "gpt-4o",
                   "messages": [
                       {
-                          "role": "system",
-                          "content": "请你作为一位专业的内容分析师,我会提供一个网址,帮我阅读并总结以下网址的内容:请遵循以下要求:1. 提取核心观点和关键信息2. 保持原文的主要论点和逻辑结构3. 以简洁清晰的方式呈现4. 去除冗余内容,保留精华部分输出格式:1. 核心要点(3-5点)2. 详细总结(300-500字)3. 关键见解(如有); 注意,使用中文答复!"
-                      },
-                      {
                           "role": "user", 
-                          "content": "网址是: " + this.itemSelectedDetails.link
+                          "content": "请总结以下文章的主要内容，用一段话概括，目标读者是IT从业者。 请力求简洁明了，长度约为100-150字，并保持客观语气。重点关注文章的核心论点和关键发现。"+ markdown
                       }
                   ],
                   "stream": true
