@@ -359,11 +359,17 @@ var vm = new Vue({
   },
   methods: {
     renderMarkdown: function(markdown) {
-      if (typeof marked === 'undefined') {
-        console.error('marked.js is not loaded.');
-        return markdown; // Return original markdown if marked.js is not available
-      }
-      return marked.parse(markdown);
+        // 检查是否为指定域名
+        if (url && url.includes('werss.bestblogs.dev')) {
+          if (typeof marked === 'undefined') {
+            console.error('marked.js is not loaded.');
+            return markdown; // Return original markdown if marked.js is not available
+          }
+          return marked.parse(markdown);
+        } else {
+          // 对于其他域名,直接返回原始内容
+          return markdown;
+        }
     },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
