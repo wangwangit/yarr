@@ -358,6 +358,13 @@ var vm = new Vue({
     },
   },
   methods: {
+    renderMarkdown: function(markdown) {
+      if (typeof marked === 'undefined') {
+        console.error('marked.js is not loaded.');
+        return markdown; // Return original markdown if marked.js is not available
+      }
+      return marked.parse(markdown);
+    },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
         if (loopMode && !vm.itemSelected) vm.refreshItems()

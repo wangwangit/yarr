@@ -321,14 +321,20 @@ func (s *Server) handleItem(c *router.Context) {
 			return
 		}
 
-		// runtime fix for relative links
-		if !htmlutil.IsAPossibleLink(item.Link) {
-			if feed := s.db.GetFeed(item.FeedId); feed != nil {
-				item.Link = htmlutil.AbsoluteUrl(item.Link, feed.Link)
+		// 尝试使用 jina.ai 解析
+		jinaURL := "https://r.jina.ai/" + item.Link
+		jinaContent, err := worker.GetBody(jinaURL)
+		if err == nil { // jina.ai 解析成功
+			item.Content = sanitizer.Sanitize(item.Link, jinaContent)
+		} else { // jina.ai 解析失败，使用原有方法
+			// runtime fix for relative links
+			if !htmlutil.IsAPossibleLink(item.Link) {
+				if feed := s.db.GetFeed(item.FeedId); feed != nil {
+					item.Link = htmlutil.AbsoluteUrl(item.Link, feed.Link)
+				}
 			}
+			item.Content = sanitizer.Sanitize(item.Link, item.Content)
 		}
-
-		item.Content = sanitizer.Sanitize(item.Link, item.Content)
 
 		c.JSON(http.StatusOK, item)
 	} else if c.Req.Method == "PUT" {
