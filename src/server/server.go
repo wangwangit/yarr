@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-
 	"github.com/nkanaev/yarr/src/storage"
 	"github.com/nkanaev/yarr/src/worker"
 )
@@ -65,16 +64,4 @@ func (s *Server) Start() {
 	if err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
-}
-
-func (s *Server) handleSettings(c *router.Context) {
-    if c.Req.Method == "GET" {
-        noReferrerDomains := os.Getenv("YARR_NO_REFERRER_DOMAINS")
-        settings := &Settings{
-            // ... existing settings ...
-            NoReferrerDomains: noReferrerDomains,
-        }
-        c.JSON(http.StatusOK, settings)
-    }
-    // ... rest of the handler ...
 }
