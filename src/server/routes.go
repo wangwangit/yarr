@@ -435,20 +435,7 @@ func (s *Server) handleItemList(c *router.Context) {
 
 func (s *Server) handleSettings(c *router.Context) {
 	if c.Req.Method == "GET" {
-		settings := &Settings{
-            Theme:            s.db.GetSettingWithDefault("theme", "light"),
-            ThemeFont:        s.db.GetSettingWithDefault("theme_font", ""),
-            ThemeSize:        s.db.GetSettingWithFallback("theme_size", "1"),
-            Filter:           s.db.GetSettingWithDefault("filter", "unread"),
-            Feed:            s.db.GetSettingWithDefault("feed", ""),
-            FeedListWidth:    s.db.GetSettingWithFallback("feed_list_width", "300"),
-            ItemListWidth:    s.db.GetSettingWithFallback("item_list_width", "300"),
-            SortNewestFirst:  s.db.GetSettingWithDefault("sort_newest_first", "1") == "1",
-            RefreshRate:      s.db.GetSettingWithFallback("refresh_rate", "0"),
-            NoReferrerDomains: os.Getenv("YARR_NO_REFERRER_DOMAINS"), // 添加这行
-        }
-        c.JSON(http.StatusOK, settings)
-        return
+		c.JSON(http.StatusOK, s.db.GetSettings())
 	} else if c.Req.Method == "PUT" {
 		settings := make(map[string]interface{})
 		if err := json.NewDecoder(c.Req.Body).Decode(&settings); err != nil {

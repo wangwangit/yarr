@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+
 	"github.com/nkanaev/yarr/src/storage"
 	"github.com/nkanaev/yarr/src/worker"
 )
@@ -23,7 +24,6 @@ type Server struct {
 	// https
 	CertFile string
 	KeyFile  string
-	NoReferrerDomains string `json:"no_referrer_domains"`
 }
 
 func NewServer(db *storage.Storage, addr string) *Server {
