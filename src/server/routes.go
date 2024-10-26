@@ -9,7 +9,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
-	"strings"
+	"os"  // 添加这行
+    "strings"  // 确保已导入
 	"github.com/nkanaev/yarr/src/assets"
 	"github.com/nkanaev/yarr/src/content/htmlutil"
 	"github.com/nkanaev/yarr/src/content/readability"
