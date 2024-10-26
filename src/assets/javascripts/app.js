@@ -370,6 +370,14 @@ var vm = new Vue({
   
     renderMarkdown: function(markdown) {
       console.log('Rendering markdown:', markdown.substring(0, 300) + '...');
+          // 处理微信图片,添加 referrerpolicy 属性
+        markdown = markdown.replace(/<img([^>]*)src="([^"]*)"([^>]*)>/g, function(match, before, src, after) {
+          if(src.includes('mmbiz.qpic.cn')) {
+              return `<img${before}src="${src}"${after} referrerpolicy="no-referrer">`;
+          }
+          return match;
+      });
+
       // 检查是否为指定域名
       if (markdown.substring(0, 300).includes('Markdown')) {
           console.log('Markdown Content detected');
