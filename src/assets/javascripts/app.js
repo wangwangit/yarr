@@ -370,28 +370,33 @@ var vm = new Vue({
   
     renderMarkdown: function(markdown) {
       console.log('Rendering markdown:', markdown.substring(0, 300) + '...');
-          // 处理微信图片,添加 referrerpolicy 属性
-        markdown = markdown.replace(/<img([^>]*)src="([^"]*)"([^>]*)>/g, function(match, before, src, after) {
-          if(src.includes('mmbiz.qpic.cn')) {
-              return `<img${before}src="${src}"${after} referrerpolicy="no-referrer">`;
-          }
-          return match;
-      });
+ // 从环境变量或配置中获取需要no-referrer的域名列表
+ const noReferrerDomains = (window.app.settings.no_referrer_domains || '').split(',').map(d => d.trim());
+    
+ // 处理图片标签,根据域名动态添加referrerpolicy属性
+ markdown = markdown.replace(/<img([^>]*)src="([^"]*)"([^>]*)>/g, function(match, before, src, after) {
+   // 检查图片URL是否包含指定域名
+   const needsNoReferrer = noReferrerDomains.some(domain => 
+     domain && src.includes(domain)
+   );
+   
+   if (needsNoReferrer) {
+     // 如果是指定域名,添加no-referrer
+     return `<img${before}src="${src}"${after} referrerpolicy="no-referrer">`;
+   }
+   return match; // 其他域名保持原样
+ });
 
-      // 检查是否为指定域名
-      if (markdown.substring(0, 300).includes('Markdown')) {
-          console.log('Markdown Content detected');
-          if (typeof marked === 'undefined') {
-              console.error('marked.js is not loaded.');
-              return markdown; // Return original markdown if marked.js is not available
-          }
-          console.log('Parsing markdown with marked.js');
-          return marked.parse(markdown);
-      } else {
-          console.log('No Markdown Content detected, returning original content');
-          // 对于其他域名,直接返回原始内容
-          return markdown;
-      }
+ // 检查是否为Markdown内容
+ if (markdown.substring(0, 300).includes('Markdown')) {
+   if (typeof marked === 'undefined') {
+     console.error('marked.js is not loaded.');
+     return markdown;
+   }
+   return marked.parse(markdown);
+ } else {
+   return markdown;
+ }
   },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
