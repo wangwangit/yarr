@@ -320,10 +320,13 @@ func (s *Server) handleItem(c *router.Context) {
 			c.Out.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		var specialDomains = []string{
-			"werss.bestblogs.dev",
-			"mp.weixin.qq.com",
-		}
+		   // 从环境变量获取special domains
+		   specialDomainsStr := os.Getenv("YARR_SPECIAL_DOMAINS")
+		   var specialDomains []string
+		   if specialDomainsStr != "" {
+			   specialDomains = strings.Split(specialDomainsStr, ",")
+		   }
+   
  // 检查item.Link是否包含指定域名
  log.Printf("Checking item link: %s", item.Link)
  containsSpecialDomain := false
